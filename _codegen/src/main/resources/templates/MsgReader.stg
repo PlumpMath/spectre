@@ -1,0 +1,26 @@
+msg_reader(msgType, pkgName, clsPath, clsName) ::= <<
+
+package $pkgName$;
+
+import java.io.DataInputStream;
+import java.util.Iterator;
+import org.apache.mahout.math.Varint;
+import skadistats.spectre.AspectReader;
+import $clsPath$;
+
+public class Reader extends AspectReader implements Iterator<$clsName$> {
+    public Reader(int replayId) { super(replayId); }
+
+    public $clsName$ next() {
+        while (hasNext()) {
+            DataInputStream din = new DataInputStream(this.in);
+
+            int msgType = Varint.readUnsignedVarInt(din);
+            if (consumeIfInternal(msgType) == $msgType.msgId$) {
+                return clsName.parseFrom(this.in);
+            } 
+        }
+    }
+
+}
+>>

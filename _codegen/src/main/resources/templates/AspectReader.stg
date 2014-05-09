@@ -1,0 +1,73 @@
+aspect_reader(msgTypes) ::= <<
+
+package skadistats.spectre;
+
+import java.io.InputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.LinkedList;
+import org.apache.mahout.math.Varint;
+import skadistats.spectre.proto.Util;
+
+public class AspectReader {
+    protected int initReplayId;
+    protected int replayId;
+    protected int tick;
+    protected List<String> strTable;
+    protected InputStream in;
+
+    public AspectReader(int replayId) {
+        this.initReplayId = replayId;
+        this.replayId = null;
+        this.tick = 0;
+        this.strTable = new LinkedList<String>();
+        this.in = null;
+    }
+
+    public boolean hasNext() {
+        try {
+            DataInputStream din = new DataInputStream(this.in);
+            this.in.mark(32);
+            int msgType = Varint.readUnsignedVarInt(din);
+            this.in.reset();
+            
+            return true;
+        } catch(IOException ex) {
+            return false;
+        }
+    }
+
+    public int consumeIfInternal(int msgType) {
+        switch(msgType) {
+            case 0: // Util.Segment
+                Util.Segment seg = Util.Segment.parseFrom(this.in);
+                this.tick = seg.getTick();
+                break;
+            case 1: // Util.Info
+                Util.Info info = Util.Info.parseFrom(this.in);
+                this.replayId = info.getReplayId();
+                break;
+            case 2: // Util.StringTable
+                Util.StringTable st = Util.StringTable.parseFrom(this.in);
+                this.strTable = st.getValueList();
+                break;
+        }
+        return msgType;
+    }
+
+    public static skadistats.spectre.AspectReader newReader(String aspectPath, int replayId) {
+    
+        $msgTypes:instantiate_msg_type()$
+
+        throw new RuntimeException("Unknown Aspect: "+aspectPath);
+    }
+
+}
+>>
+
+instantiate_msg_type(msgType) ::= <<
+if (aspectPath.equals("$msgType.aspectPath$")) {
+    return new $msgType.msgCls$(replayId);
+}
+>>

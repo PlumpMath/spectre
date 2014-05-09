@@ -1,0 +1,14 @@
+package skadistats.spectre.basic.position.hero;
+
+import java.io.IOException;
+import skadistats.spectre.proto.basic.Position;
+
+public class Writer extends skadistats.spectre.AspectWriter {
+    public Writer(String baseDir, int replayId) { 
+        super(baseDir, replayId); 
+    }
+
+    public void write(Position.HeroPosition msg) throws IOException {
+        this.write(3, msg.toByteArray());
+    }
+}
