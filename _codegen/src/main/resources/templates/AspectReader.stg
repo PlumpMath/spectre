@@ -10,6 +10,8 @@ import java.util.LinkedList;
 import org.apache.mahout.math.Varint;
 import skadistats.spectre.proto.Util;
 
+$msgTypes:import_pkg()$
+
 public class AspectReader {
     protected int initReplayId;
     protected int replayId;
@@ -19,7 +21,7 @@ public class AspectReader {
 
     public AspectReader(int replayId) {
         this.initReplayId = replayId;
-        this.replayId = null;
+        this.replayId = 0;
         this.tick = 0;
         this.strTable = new LinkedList<String>();
         this.in = null;
@@ -64,6 +66,10 @@ public class AspectReader {
     }
 
 }
+>>
+
+import_pkg(msgType) ::= <<
+import $msgType.pkgPath$;
 >>
 
 instantiate_msg_type(msgType) ::= <<

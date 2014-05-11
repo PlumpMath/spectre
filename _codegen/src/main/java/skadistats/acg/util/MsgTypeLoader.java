@@ -28,6 +28,7 @@ public class MsgTypeLoader {
         public String msgCls;
         public int    msgId;
         public String aspectPath;
+        public String pkgPath;
         public String toString() { return this.msgCls+":"+this.msgId+":"+this.aspectPath; }
     }
 

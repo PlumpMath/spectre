@@ -20,10 +20,12 @@ public class Generate {
         MsgTypeLoader mtLoader = new MsgTypeLoader();
         List<MessageType> msgTypes = mtLoader.getMsgTypes();
 
+        System.out.println(new GenAspectReader(msgTypes));
         new GenAspectReader(msgTypes).build();
         new GenAspectWriter(msgTypes).build();
 
         for (MessageType msgType : msgTypes) {
+            System.out.println(new GenReader(msgType));
             new GenReader(msgType).build();
         }
             

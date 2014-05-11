@@ -19,6 +19,8 @@ public class GenReader extends BaseGenerator {
         STGroup tmplGroup = new STGroupFile("templates/MsgReader.stg", '$', '$');
         ST tmpl = tmplGroup.getInstanceOf("msg_reader");
 
+        msgType.pkgPath = "skadistats.spectre."+msgType.aspectPath+".Reader";
+
         tmpl.add("msgType", msgType);
 
         tmpl.add("pkgName", "skadistats.spectre"+msgType.aspectPath.replace('/', '.'));
