@@ -25,11 +25,13 @@ public class MsgTypeLoader {
     }
 
     static public class MessageType {
-        public String msgCls;
         public int    msgId;
         public String aspectPath;
-        public String pkgPath;
-        public String toString() { return this.msgCls+":"+this.msgId+":"+this.aspectPath; }
+        public String protoPkg;
+        public String protoFullCls;
+        public String protoCls;
+        public String readWritePkg;
+        public String toString() { return protoFullCls+":"+msgId+":"+aspectPath; }
     }
 
     private MessageType parseProperty(Map.Entry<Object,Object> entry) {
@@ -40,12 +42,18 @@ public class MsgTypeLoader {
         if (sval.length == 2) {
             try {
                 MessageType msg = new MessageType();
-                msg.msgCls = key.trim();
                 msg.msgId  = Integer.valueOf(sval[0].trim());
                 msg.aspectPath = sval[1].trim();
+
+                msg.protoFullCls = key.trim();
+                msg.protoCls = msg.protoFullCls.split("\\.")[1];
+                msg.protoPkg = "skadistats.spectre.proto"
+                             + "."+msg.aspectPath.split("/")[1];
+
+                msg.readWritePkg = "skadistats.spectre"+msg.aspectPath.replace('/','.');
                 return msg;
             } catch(RuntimeException ex) {
-                throw new InvalidMessageDeclaration(ex+"| "+key+" : "+val);
+                throw new InvalidMessageDeclaration(ex+" | "+key+" : "+val);
             }
         } else {
             throw new InvalidMessageDeclaration(key+" : "+val);

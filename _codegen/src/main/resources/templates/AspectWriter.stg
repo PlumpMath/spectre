@@ -13,22 +13,23 @@ import org.apache.mahout.math.Varint;
 import skadistats.spectre.err.OutOfOrderWrite;
 import skadistats.spectre.proto.Util;
 
+
 public class AspectWriter {
     protected String baseDir;
     protected int replayId; 
-    protected int currentTick;
+    protected int tick;
     protected List strTable; 
     protected OutputStream out;
 
     public AspectWriter(String baseDir, int replayId) {
         this.baseDir = baseDir;
         this.replayId = replayId;
-        this.currentTick = 0;
+        this.tick = 0;
         this.strTable = new LinkedList<String>();
         this.out = null;
     }
 
-    protected void write(int msgType, byte[] data) throws IOException {
+    protected void writeBytes(int msgType, byte[] data) throws IOException {
         DataOutputStream dout = new DataOutputStream(this.out);
         // write msg_type
         Varint.writeUnsignedVarInt(msgType, dout);
@@ -46,14 +47,16 @@ public class AspectWriter {
     }
 
     public void setTick(int tick) throws IOException {
-        if (tick < this.currentTick)
-            throw new OutOfOrderWrite(tick+" < "+this.currentTick);
-        else if (tick > this.currentTick) {
+        if (tick < this.tick)
+            throw new OutOfOrderWrite(tick+" < "+this.tick);
+        else if (tick > this.tick) {
             Util.Segment segment = Util.Segment.newBuilder()
                 .setTick(tick)
                 .build();
-            this.write(0, segment.toByteArray());
-            this.currentTick = tick;
+            this.writeBytes(0, segment.toByteArray());
+            this.tick = tick;
+        } else {
+            // do nothing
         }
     }
 
@@ -64,12 +67,14 @@ public class AspectWriter {
         throw new RuntimeException("Unknown Aspect: "+aspectPath);
     }
 
-    public void finalize() throws IOException {
+    $msgTypes:define_writers()$
+
+    public void finish() throws IOException {
         // write string table
         Util.StringTable stable = Util.StringTable.newBuilder()
             .addAllValue(this.strTable)
             .build();
-        this.write(2, stable.toByteArray());
+        this.writeBytes(2, stable.toByteArray());
         this.out.close();
     }
 }
@@ -77,6 +82,12 @@ public class AspectWriter {
 
 instantiate_msg_type(msgType) ::= <<
 if (aspectPath.equals("$msgType.aspectPath$")) {
-    return new $msgType.msgCls$(baseDir, replayId);
+    return new $msgType.readWritePkg$.Writer(baseDir, replayId);
+}
+>>
+
+define_writers(msgType) ::= <<
+public void write($msgType.protoPkg$.$msgType.protoFullCls$ msg) throws IOException {
+    throw new RuntimeException("Incorrect Writer instantiated");
 }
 >>

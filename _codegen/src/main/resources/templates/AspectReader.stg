@@ -10,21 +10,19 @@ import java.util.LinkedList;
 import org.apache.mahout.math.Varint;
 import skadistats.spectre.proto.Util;
 
-$msgTypes:import_pkg()$
 
-public class AspectReader {
+public abstract class AspectReader {
+    protected String baseDir;
     protected int initReplayId;
     protected int replayId;
     protected int tick;
     protected List<String> strTable;
     protected InputStream in;
 
-    public AspectReader(int replayId) {
+    public AspectReader(String baseDir, int replayId) {
+        this.baseDir = baseDir;
         this.initReplayId = replayId;
-        this.replayId = 0;
-        this.tick = 0;
         this.strTable = new LinkedList<String>();
-        this.in = null;
     }
 
     public boolean hasNext() {
@@ -40,7 +38,7 @@ public class AspectReader {
         }
     }
 
-    public int consumeIfInternal(int msgType) {
+    public int consumeIfInternal(int msgType) throws IOException {
         switch(msgType) {
             case 0: // Util.Segment
                 Util.Segment seg = Util.Segment.parseFrom(this.in);
@@ -58,22 +56,26 @@ public class AspectReader {
         return msgType;
     }
 
-    public static skadistats.spectre.AspectReader newReader(String aspectPath, int replayId) {
+    public static AspectReader newReader(String baseDir, String aspectPath, int replayId) {
     
         $msgTypes:instantiate_msg_type()$
 
         throw new RuntimeException("Unknown Aspect: "+aspectPath);
     }
 
-}
->>
+    $msgTypes:define_iters()$
 
-import_pkg(msgType) ::= <<
-import $msgType.pkgPath$;
+}
 >>
 
 instantiate_msg_type(msgType) ::= <<
 if (aspectPath.equals("$msgType.aspectPath$")) {
-    return new $msgType.msgCls$(replayId);
+    return new $msgType.readWritePkg$.Reader(baseDir, replayId);
+}
+>>
+
+define_iters(msgType) ::= <<
+public Iterable<$msgType.protoPkg$.$msgType.protoFullCls$> iter$msgType.protoCls$() {
+    throw new RuntimeException("Incorrect Reader instantiated");
 }
 >>

@@ -1,26 +1,39 @@
-msg_reader(msgType, pkgName, clsPath, clsName) ::= <<
+msg_reader(msgType) ::= <<
 
-package $pkgName$;
+package $msgType.readWritePkg$;
 
+import java.io.IOException;
 import java.io.DataInputStream;
 import java.util.Iterator;
 import org.apache.mahout.math.Varint;
 import skadistats.spectre.AspectReader;
-import $clsPath$;
+import $msgType.protoPkg$.$msgType.protoFullCls$;
 
-public class Reader extends AspectReader implements Iterator<$clsName$> {
-    public Reader(int replayId) { super(replayId); }
+public class Reader extends AspectReader 
+    implements Iterator<$msgType.protoCls$>, Iterable<$msgType.protoCls$> {
 
-    public $clsName$ next() {
-        while (hasNext()) {
-            DataInputStream din = new DataInputStream(this.in);
+    public Reader(String baseDir, int replayId) { super(baseDir, replayId); }
 
-            int msgType = Varint.readUnsignedVarInt(din);
-            if (consumeIfInternal(msgType) == $msgType.msgId$) {
-                return clsName.parseFrom(this.in);
-            } 
+    public $msgType.protoCls$ next() {
+        try {
+            while (hasNext()) {
+                DataInputStream din = new DataInputStream(this.in);
+    
+                int msgType = Varint.readUnsignedVarInt(din);
+                // ID: $msgType.msgId$ = $msgType.aspectPath$
+                if (consumeIfInternal(msgType) == $msgType.msgId$) {
+                    return $msgType.protoCls$.parseFrom(this.in);
+                } 
+            }
+        } catch(IOException ex) {
+            System.err.println(ex);
         }
+        return null;
     }
+
+    public Iterable<$msgType.protoCls$> iter$msgType.protoCls$() { return this; }
+
+    public Iterator<$msgType.protoCls$> iterator() { return this; }
 
 }
 >>
