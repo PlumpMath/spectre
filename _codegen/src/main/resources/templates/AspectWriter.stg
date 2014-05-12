@@ -15,18 +15,19 @@ import skadistats.spectre.proto.Util;
 
 
 public class AspectWriter {
-    protected String baseDir;
     protected int replayId; 
     protected int tick;
     protected List strTable; 
+    protected String replayPath;
     protected OutputStream out;
 
-    public AspectWriter(String baseDir, int replayId) {
-        this.baseDir = baseDir;
+    public AspectWriter(int replayId) {
         this.replayId = replayId;
-        this.tick = 0;
         this.strTable = new LinkedList<String>();
-        this.out = null;
+    }
+
+    protected OutputStream getOutputStream() {
+        File aspectBasePath = new File(replayPath).
     }
 
     protected void writeBytes(int msgType, byte[] data) throws IOException {

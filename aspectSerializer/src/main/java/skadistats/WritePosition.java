@@ -18,6 +18,7 @@ public class WritePosition {
                .setPosY(200)
                .build();
         writer.write(aPos);
+        writer.finish();
 
         AspectReader reader = spectre.newReader("/basic/position/hero", 1111);
 
