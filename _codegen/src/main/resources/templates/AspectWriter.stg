@@ -19,23 +19,16 @@ public class AspectWriter {
     protected int tick;
     protected List strTable; 
     protected String replayPath;
-    protected OutputStream out;
+    protected Persister persist;
 
-    public AspectWriter(int replayId) {
+    public AspectWriter(Persister p, int replayId) {
         this.replayId = replayId;
         this.strTable = new LinkedList<String>();
+        this.persist = p;
     }
 
-    protected OutputStream getOutputStream() {
-        File aspectBasePath = new File(replayPath).
-    }
-
-    protected void writeBytes(int msgType, byte[] data) throws IOException {
-        DataOutputStream dout = new DataOutputStream(this.out);
-        // write msg_type
-        Varint.writeUnsignedVarInt(msgType, dout);
-        // write data
-        dout.write(data);
+    protected void writeMsg(int msgType, byte[] msgData) throws IOException {
+        persist.writeMsg(msgType, msgData);
     }
 
     public int indexString(String str) {

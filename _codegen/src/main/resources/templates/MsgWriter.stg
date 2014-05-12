@@ -9,7 +9,7 @@ public class Writer extends skadistats.spectre.AspectWriter {
     public Writer(String baseDir, int replayId) { super(baseDir,replayId); }
 
     public void write($msgType.protoCls$ msg) throws IOException {
-        this.writeBytes($msgType.msgId$, msg.toByteArray());
+        this.writeMsg($msgType.msgId$, msg.toByteArray());
     }
 }
 >>
