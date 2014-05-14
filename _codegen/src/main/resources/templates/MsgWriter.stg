@@ -2,11 +2,12 @@ msg_writer(msgType) ::= <<
 
 package $msgType.readWritePkg$;
 
+import java.io.OutputStream;
 import java.io.IOException;
 import $msgType.protoPkg$.$msgType.protoFullCls$;
 
 public class Writer extends skadistats.spectre.AspectWriter {
-    public Writer(String baseDir, int replayId) { super(baseDir,replayId); }
+    public Writer(OutputStream outStream) { super(outStream); }
 
     public void write($msgType.protoCls$ msg) throws IOException {
         this.writeMsg($msgType.msgId$, msg.toByteArray());

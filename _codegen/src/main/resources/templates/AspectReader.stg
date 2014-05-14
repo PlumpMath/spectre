@@ -10,27 +10,37 @@ import java.util.LinkedList;
 import org.apache.mahout.math.Varint;
 import skadistats.spectre.proto.Util;
 
+import skadistats.spectre.err.*;
+
 
 public abstract class AspectReader {
-    protected String baseDir;
-    protected int initReplayId;
     protected int replayId;
     protected int tick;
     protected List<String> strTable;
-    protected InputStream in;
+    protected InputStream inStream;
 
-    public AspectReader(String baseDir, int replayId) {
-        this.baseDir = baseDir;
-        this.initReplayId = replayId;
+    public AspectReader(InputStream inStream) {
+        this.inStream = inStream;
         this.strTable = new LinkedList<String>();
+
+        // read replayId from stream
+        try {
+            DataInputStream din = new DataInputStream(inStream);
+            int msgType = Varint.readUnsignedVarInt(din);
+            if (consumeIfInternal(msgType) != 1) {
+                throw new MalformedAspect("Util.Info not first message in aspect");
+            }
+        } catch (IOException ioe) {
+            throw new MalformedAspect(ioe.toString());
+        }
     }
 
     public boolean hasNext() {
         try {
-            DataInputStream din = new DataInputStream(this.in);
-            this.in.mark(32);
+            DataInputStream din = new DataInputStream(inStream);
+            inStream.mark(32);
             int msgType = Varint.readUnsignedVarInt(din);
-            this.in.reset();
+            inStream.reset();
             
             return true;
         } catch(IOException ex) {
@@ -41,26 +51,27 @@ public abstract class AspectReader {
     public int consumeIfInternal(int msgType) throws IOException {
         switch(msgType) {
             case 0: // Util.Segment
-                Util.Segment seg = Util.Segment.parseFrom(this.in);
+                Util.Segment seg = Util.Segment.parseFrom(inStream);
                 this.tick = seg.getTick();
                 break;
             case 1: // Util.Info
-                Util.Info info = Util.Info.parseFrom(this.in);
+                Util.Info info = Util.Info.parseFrom(inStream);
                 this.replayId = info.getReplayId();
                 break;
             case 2: // Util.StringTable
-                Util.StringTable st = Util.StringTable.parseFrom(this.in);
+                Util.StringTable st = Util.StringTable.parseFrom(inStream);
                 this.strTable = st.getValueList();
                 break;
         }
         return msgType;
     }
 
-    public static AspectReader newReader(String baseDir, String aspectPath, int replayId) {
+    public static AspectReader newReader(InputStream inStream, String aspectPath) 
+        throws AspectNotFound {
     
         $msgTypes:instantiate_msg_type()$
 
-        throw new RuntimeException("Unknown Aspect: "+aspectPath);
+        throw new AspectNotFound();
     }
 
     $msgTypes:define_iters()$
@@ -70,7 +81,7 @@ public abstract class AspectReader {
 
 instantiate_msg_type(msgType) ::= <<
 if (aspectPath.equals("$msgType.aspectPath$")) {
-    return new $msgType.readWritePkg$.Reader(baseDir, replayId);
+    return new $msgType.readWritePkg$.Reader(inStream);
 }
 >>
 

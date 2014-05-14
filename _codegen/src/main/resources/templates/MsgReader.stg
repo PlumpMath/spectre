@@ -2,6 +2,7 @@ msg_reader(msgType) ::= <<
 
 package $msgType.readWritePkg$;
 
+import java.io.InputStream;
 import java.io.IOException;
 import java.io.DataInputStream;
 import java.util.Iterator;
@@ -12,17 +13,17 @@ import $msgType.protoPkg$.$msgType.protoFullCls$;
 public class Reader extends AspectReader 
     implements Iterator<$msgType.protoCls$>, Iterable<$msgType.protoCls$> {
 
-    public Reader(String baseDir, int replayId) { super(baseDir, replayId); }
+    public Reader(InputStream inStream) { super(inStream); }
 
     public $msgType.protoCls$ next() {
         try {
             while (hasNext()) {
-                DataInputStream din = new DataInputStream(this.in);
+                DataInputStream din = new DataInputStream(inStream);
     
                 int msgType = Varint.readUnsignedVarInt(din);
                 // ID: $msgType.msgId$ = $msgType.aspectPath$
                 if (consumeIfInternal(msgType) == $msgType.msgId$) {
-                    return $msgType.protoCls$.parseFrom(this.in);
+                    return $msgType.protoCls$.parseFrom(inStream);
                 } 
             }
         } catch(IOException ex) {
