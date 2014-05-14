@@ -18,15 +18,18 @@ public abstract class AspectReader {
     protected int tick;
     protected List<String> strTable;
     protected InputStream inStream;
+    protected DataInputStream dinStream;
+
+    public final static int MAX_MSG_SIZE = 4096;
 
     public AspectReader(InputStream inStream) {
         this.inStream = inStream;
+        this.dinStream = new DataInputStream(inStream);
         this.strTable = new LinkedList<String>();
 
         // read replayId from stream
         try {
-            DataInputStream din = new DataInputStream(inStream);
-            int msgType = Varint.readUnsignedVarInt(din);
+            int msgType = Varint.readUnsignedVarInt(dinStream);
             if (consumeIfInternal(msgType) != 1) {
                 throw new MalformedAspect("Util.Info not first message in aspect");
             }
@@ -37,9 +40,8 @@ public abstract class AspectReader {
 
     public boolean hasNext() {
         try {
-            DataInputStream din = new DataInputStream(inStream);
             inStream.mark(32);
-            int msgType = Varint.readUnsignedVarInt(din);
+            int msgType = Varint.readUnsignedVarInt(dinStream);
             inStream.reset();
             
             return true;
@@ -51,19 +53,44 @@ public abstract class AspectReader {
     public int consumeIfInternal(int msgType) throws IOException {
         switch(msgType) {
             case 0: // Util.Segment
-                Util.Segment seg = Util.Segment.parseFrom(inStream);
+                Util.Segment seg = Util.Segment.parseFrom(getMsgBytes());
                 this.tick = seg.getTick();
                 break;
             case 1: // Util.Info
-                Util.Info info = Util.Info.parseFrom(inStream);
+                Util.Info info = Util.Info.parseFrom(getMsgBytes());
                 this.replayId = info.getReplayId();
                 break;
             case 2: // Util.StringTable
-                Util.StringTable st = Util.StringTable.parseFrom(inStream);
+                Util.StringTable st = Util.StringTable.parseFrom(getMsgBytes());
                 this.strTable = st.getValueList();
                 break;
         }
         return msgType;
+    }
+
+    protected byte[] getMsgBytes() throws IOException {
+        int msgSize = 0;
+
+        msgSize = Varint.readUnsignedVarInt(dinStream);
+        if (msgSize <= MAX_MSG_SIZE) {
+            byte[] byteBuf = new byte[msgSize];
+            int readCount = 0;
+            int n = 0;
+
+            while (readCount < msgSize) {
+                n = inStream.read(byteBuf, readCount, msgSize-readCount);
+                if (n == -1) {
+                    throw new MalformedAspect("Unexpected EOF. msgSize="+msgSize+", readCount="+readCount);
+                }
+                readCount += n;
+            }
+
+            return byteBuf;
+        }
+        else {
+            throw new RuntimeException("MAX_MSG_SIZE exceeded, msgSize="+msgSize);
+        }
+
     }
 
     public static AspectReader newReader(InputStream inStream, String aspectPath) 

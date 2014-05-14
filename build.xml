@@ -1,5 +1,6 @@
 <project name="spectre" default="dist" basedir=".">
     <property name="spectre-dir" location="./aspectSerializer"/>
+    <property name="spectre-jar" location="${spectre-dir}/target/spectre-1.0-jar-with-dependencies.jar"/>
     <property name="cgen-dir" location="./_codegen"/>
     <property name="cgen-jar" location="${cgen-dir}/target/aspect-code-generator-1.0-jar-with-dependencies.jar"/>
 
@@ -32,6 +33,10 @@
     </target>
 
     <target name="dist" depends="compile">
+        <exec executable="mvn" dir="${spectre-dir}">
+            <arg value="--quiet"/>
+            <arg value="package"/>
+        </exec>
     </target>
 
     <target name="clean">
@@ -56,7 +61,7 @@
         </exec>
     </target>
 
-    <target name="write-test" depends="compile">
-        <java classname="skadistats.WritePosition" classpath="${spectre-dir}/target/classes" failonerror="true"/>
+    <target name="write-test" depends="dist">
+        <java classname="skadistats.WritePosition" classpath="${spectre-jar}" failonerror="true"/>
     </target>
 </project>

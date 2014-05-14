@@ -23,7 +23,7 @@ public class Reader extends AspectReader
                 int msgType = Varint.readUnsignedVarInt(din);
                 // ID: $msgType.msgId$ = $msgType.aspectPath$
                 if (consumeIfInternal(msgType) == $msgType.msgId$) {
-                    return $msgType.protoCls$.parseFrom(inStream);
+                    return $msgType.protoCls$.parseFrom(getMsgBytes());
                 } 
             }
         } catch(IOException ex) {

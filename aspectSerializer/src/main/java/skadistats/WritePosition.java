@@ -24,6 +24,7 @@ public class WritePosition {
         AspectReader reader = spectre.newReader("/basic/position/hero", 1111);
 
         for (HeroPosition pos : reader.iterHeroPosition()) {
+            System.out.println(pos.getHeroIdx()+" : "+pos.getPosX()+"/"+pos.getPosY());
         }
     }
 }

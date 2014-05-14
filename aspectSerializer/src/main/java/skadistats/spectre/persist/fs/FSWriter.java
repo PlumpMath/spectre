@@ -1,5 +1,6 @@
 package skadistats.spectre.persist.fs;
 
+import java.io.File;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -14,8 +15,11 @@ public class FSWriter extends OutputStream {
     public FSWriter(String aspectBase, String aspectPath, int replayId) 
         throws AspectNotFound {
 
-        String filePath = aspectBase+"/"+aspectPath+"/"+replayId;
+        File filePath = new File(aspectBase+"/"+aspectPath+"/"+replayId);
         try {
+            if (!filePath.getParentFile().exists()) 
+                filePath.getParentFile().mkdirs();
+
             fileOut = new FileOutputStream(filePath);
         } catch (FileNotFoundException ex) {
             throw new AspectNotFound(ex.toString());

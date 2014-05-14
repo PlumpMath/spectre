@@ -18,16 +18,23 @@ public class AspectWriter {
     protected List strTable; 
     protected OutputStream outStream;
 
-    public AspectWriter(OutputStream outStream) {
+    public AspectWriter(OutputStream outStream, int replayId) throws IOException {
         this.outStream = outStream;
         this.strTable = new LinkedList<String>();
+
+        // write replayId to stream
+        Util.Info info = Util.Info.newBuilder()
+                         .setReplayId(replayId)
+                         .build();
+        writeMsg(1, info.toByteArray());
     }
 
     protected void writeMsg(int msgType, byte[] msgData) throws IOException {
         DataOutputStream dout = new DataOutputStream(outStream);
 
-        Varint.writeUnsignedVarInt(msgType, dout);
-        outStream.write(msgData);
+        Varint.writeUnsignedVarInt(msgType, dout);        // msgType
+        Varint.writeUnsignedVarInt(msgData.length, dout); // msgSize
+        outStream.write(msgData); // msg
     }
 
     public int indexString(String str) {
@@ -53,8 +60,8 @@ public class AspectWriter {
         }
     }
 
-    public static AspectWriter newWriter(OutputStream outStream, String aspectPath)
-        throws AspectNotFound {
+    public static AspectWriter newWriter(OutputStream outStream, String aspectPath, int replayId)
+        throws AspectNotFound, IOException {
 
         $msgTypes:instantiate_msg_type()$
 
@@ -76,7 +83,7 @@ public class AspectWriter {
 
 instantiate_msg_type(msgType) ::= <<
 if (aspectPath.equals("$msgType.aspectPath$")) {
-    return new $msgType.readWritePkg$.Writer(outStream);
+    return new $msgType.readWritePkg$.Writer(outStream, replayId);
 }
 >>
 

@@ -7,7 +7,9 @@ import java.io.IOException;
 import $msgType.protoPkg$.$msgType.protoFullCls$;
 
 public class Writer extends skadistats.spectre.AspectWriter {
-    public Writer(OutputStream outStream) { super(outStream); }
+    public Writer(OutputStream outStream, int replayId) throws IOException {
+        super(outStream, replayId);
+    }
 
     public void write($msgType.protoCls$ msg) throws IOException {
         this.writeMsg($msgType.msgId$, msg.toByteArray());
