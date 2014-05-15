@@ -52,14 +52,15 @@ public class FSReader implements AspectDeserializer {
         RandomAccessFile raf = new RandomAccessFile(filePath, "r");
         raf.seek(raf.length()-4); // strtable offset data
         int strOff = raf.readInt();
-        log.trace("strOff:{}", strOff);
+        if (strOff > raf.length())
+            throw new MalformedAspect("StringTable corrupted: strOff too big:{}", strOff); 
         raf.seek(raf.length()-strOff); // seek to beginning of strtable entry
         int strSize = strOff-4;
 
         if (strSize > 4096)
             throw new MalformedAspect("StringTable size:"+strSize+" > 4096");
         byte[] msgData = new byte[strSize];
-        log.trace("Reading StringTable from {}, size:{}", raf.getFilePointer(), strSize);
+        log.debug("Reading StringTable from {}, size:{}", raf.getFilePointer(), strSize);
         raf.readFully(msgData);
         StringTable strTable = StringTable.parseFrom(msgData);
         raf.close();

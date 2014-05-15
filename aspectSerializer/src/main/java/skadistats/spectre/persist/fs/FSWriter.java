@@ -55,7 +55,7 @@ public class FSWriter implements AspectSerializer {
         Varint.writeUnsignedVarInt(msgEnv.msgData.length, dataOut); // msgSize
         dataOut.write(msgEnv.msgData);                              // msgData
 
-        log.debug("writeMsg: msgType:{}, length:{}", msgEnv.msgType, msgEnv.msgData.length);
+        log.trace("writeMsg: msgType:{}, length:{}", msgEnv.msgType, msgEnv.msgData.length);
     }
     
     public void close(List<String> strTable) throws IOException {
@@ -82,7 +82,7 @@ public class FSWriter implements AspectSerializer {
         Varint.writeUnsignedVarInt(MSG_TICK, dataOut);
         // write msg
         Varint.writeUnsignedVarInt(tick, dataOut);
-        log.debug("writeTick: tick:{}", tick);
+        log.trace("writeTick: tick:{}", tick);
     }
 
 }

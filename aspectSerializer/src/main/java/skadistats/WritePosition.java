@@ -29,5 +29,6 @@ public class WritePosition {
         for (HeroPosition pos : reader.iterHeroPosition()) {
             System.out.println(reader.getTick()+" : ["+pos.getHeroIdx()+"] "+pos.getPosX()+"/"+pos.getPosY());
         }
+        System.out.println("Done");
     }
 }
