@@ -27,9 +27,15 @@ Extending
 Adding a new aspect is done through the following steps:
 
 ### 1. Create protobuf definition
-Create a new protobuf definition file under `/aspectSerializer/src/main/proto/aspect/<category>`
+Create a new protobuf definition file under
+
+    /aspectSerializer/src/main/proto/aspect/<category>
+
 where `category` is either `basic` or `derived` depending on the type of aspect you are
-creating. Make sure you include `option java_package = "skadistats.spectre.proto.<category"`
+creating. Make sure you include
+
+    option java_package = "skadistats.spectre.proto.<category"
+
 as part of your protobuf file so the generated classes are placed in the correct location.
 Each protobuf message name must be globally unique due to the way they are used within the
 API, however you can use the same protobuf messages for multiple different aspect path definitions.
