@@ -2,7 +2,7 @@ Overview
 ========
 
 Spectre is a java library that provides simple read/write capabilities to aspects. 
-Aspects single dimension data extracted from replays and organized in to groups
+Aspects are single dimension data extracted from replays and organized in to groups
 described by a "path". An example of such a path is `/basic/position/hero` which
 will contain the X/Y position data for all of the heroes each tick.
 
