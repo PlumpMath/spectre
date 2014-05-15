@@ -18,6 +18,7 @@ Usage
 Spectre will be available as a single .jar file that can be included in analysis
 code in order to have access to the aspects library. Basic usage of the library
 can be found by examining the example class at:
+
      /aspectSerializer/src/main/java/skadistats/WritePosition.java 
 
 Extending
