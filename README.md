@@ -31,6 +31,8 @@ Create a new protobuf definition file under `/aspectSerializer/src/main/proto/as
 where `category` is either `basic` or `derived` depending on the type of aspect you are
 creating. Make sure you include `option java_package = "skadistats.spectre.proto.<category"`
 as part of your protobuf file so the generated classes are placed in the correct location.
+Each protobuf message name must be globally unique due to the way they are used within the
+API, however you can use the same protobuf messages for multiple different aspect path definitions.
 
 ### 2. Add your new aspect to msgtypes.properties
 Edit `/aspectSerializer/src/main/proto/msgtypes.properties` and add your aspect definition.
