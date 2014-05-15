@@ -4,15 +4,17 @@ package $msgType.readWritePkg$;
 
 import java.io.OutputStream;
 import java.io.IOException;
+import skadistats.spectre.AspectWriter;
+import skadistats.spectre.persist.AspectSerializer;
+import skadistats.spectre.persist.Helpers.MessageEnvelope;
 import $msgType.protoPkg$.$msgType.protoFullCls$;
 
-public class Writer extends skadistats.spectre.AspectWriter {
-    public Writer(OutputStream outStream, int replayId) throws IOException {
-        super(outStream, replayId);
-    }
+public class Writer extends AspectWriter {
+
+    public Writer(AspectSerializer ser) throws IOException { super(ser); }
 
     public void write($msgType.protoCls$ msg) throws IOException {
-        this.writeMsg($msgType.msgId$, msg.toByteArray());
+        ser.writeMsg(new MessageEnvelope(tick, $msgType.msgId$, msg.toByteArray()));
     }
 }
 >>

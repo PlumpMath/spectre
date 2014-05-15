@@ -1,0 +1,7 @@
+package internal;
+
+option java_package = "skadistats.spectre.proto.internal";
+
+message StringTable {
+    repeated string value    = 1;
+}

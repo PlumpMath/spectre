@@ -16,7 +16,6 @@
 
     <target name="code-gen-compile" depends="is-code-gen-built" unless="codeGenJarExists">
         <exec executable="mvn" dir="${cgen-dir}">
-            <arg value="--quiet"/>
             <arg value="package"/>
         </exec>
     </target>
@@ -27,36 +26,30 @@
 
     <target name="compile" depends="init,code-gen">
         <exec executable="mvn" dir="${spectre-dir}">
-            <arg value="--quiet"/>
             <arg value="compile"/>
         </exec>
     </target>
 
     <target name="dist" depends="compile">
         <exec executable="mvn" dir="${spectre-dir}">
-            <arg value="--quiet"/>
             <arg value="package"/>
         </exec>
     </target>
 
     <target name="clean">
         <exec executable="mvn" dir="${cgen-dir}">
-            <arg value="--quiet"/>
             <arg value="clean"/>
         </exec>
         <exec executable="mvn" dir="${spectre-dir}">
-            <arg value="--quiet"/>
             <arg value="clean"/>
         </exec>
     </target>
 
     <target name="test">
         <exec executable="mvn" dir="${cgen-dir}">
-            <arg value="--quiet"/>
             <arg value="test"/>
         </exec>
         <exec executable="mvn" dir="${spectre-dir}">
-            <arg value="--quiet"/>
             <arg value="test"/>
         </exec>
     </target>

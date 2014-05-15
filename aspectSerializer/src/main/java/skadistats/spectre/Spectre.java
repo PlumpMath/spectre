@@ -17,7 +17,7 @@ public class Spectre {
     }
 
     public AspectReader newReader(String aspectPath, int replayId) 
-        throws AspectNotFound {
+        throws AspectNotFound, IOException {
 
         return AspectReader.newReader(new FSReader(baseDir, aspectPath, replayId), aspectPath);
     }
@@ -25,6 +25,6 @@ public class Spectre {
     public AspectWriter newWriter(String aspectPath, int replayId) 
         throws AspectNotFound, IOException {
 
-        return AspectWriter.newWriter(new FSWriter(baseDir, aspectPath, replayId), aspectPath, replayId);
+        return AspectWriter.newWriter(new FSWriter(baseDir, aspectPath, replayId), aspectPath);
     }
 }

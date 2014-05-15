@@ -5,36 +5,27 @@ package skadistats.spectre;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.DataOutputStream;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.LinkedList;
 import org.apache.mahout.math.Varint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import skadistats.spectre.err.*;
-import skadistats.spectre.proto.Util;
+import skadistats.spectre.persist.AspectSerializer;
 
 
 public class AspectWriter {
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
     protected int tick;
-    protected List strTable; 
-    protected OutputStream outStream;
+    protected List<String> strTable; 
+    protected AspectSerializer ser;
 
-    public AspectWriter(OutputStream outStream, int replayId) throws IOException {
-        this.outStream = outStream;
+    public AspectWriter(AspectSerializer ser) {
+        this.ser = ser;
         this.strTable = new LinkedList<String>();
-
-        // write replayId to stream
-        Util.Info info = Util.Info.newBuilder()
-                         .setReplayId(replayId)
-                         .build();
-        writeMsg(1, info.toByteArray());
-    }
-
-    protected void writeMsg(int msgType, byte[] msgData) throws IOException {
-        DataOutputStream dout = new DataOutputStream(outStream);
-
-        Varint.writeUnsignedVarInt(msgType, dout);        // msgType
-        Varint.writeUnsignedVarInt(msgData.length, dout); // msgSize
-        outStream.write(msgData); // msg
     }
 
     public int indexString(String str) {
@@ -46,21 +37,11 @@ public class AspectWriter {
         return strIdx;
     }
 
-    public void setTick(int tick) throws IOException {
-        if (tick < this.tick)
-            throw new OutOfOrderWrite(tick+" < "+this.tick);
-        else if (tick > this.tick) {
-            Util.Segment segment = Util.Segment.newBuilder()
-                .setTick(tick)
-                .build();
-            writeMsg(0, segment.toByteArray());
-            this.tick = tick;
-        } else {
-            // do nothing
-        }
+    public void setTick(int tick) {
+        this.tick = tick;
     }
 
-    public static AspectWriter newWriter(OutputStream outStream, String aspectPath, int replayId)
+    public static AspectWriter newWriter(AspectSerializer ser, String aspectPath)
         throws AspectNotFound, IOException {
 
         $msgTypes:instantiate_msg_type()$
@@ -70,20 +51,13 @@ public class AspectWriter {
 
     $msgTypes:define_writers()$
 
-    public void close() throws IOException {
-        // write string table
-        Util.StringTable stable = Util.StringTable.newBuilder()
-            .addAllValue(strTable)
-            .build();
-        writeMsg(2, stable.toByteArray());
-        outStream.close();
-    }
+    public void close() throws IOException { ser.close(strTable); }
 }
 >>
 
 instantiate_msg_type(msgType) ::= <<
 if (aspectPath.equals("$msgType.aspectPath$")) {
-    return new $msgType.readWritePkg$.Writer(outStream, replayId);
+    return new $msgType.readWritePkg$.Writer(ser);
 }
 >>
 

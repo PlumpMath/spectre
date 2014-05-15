@@ -7,34 +7,48 @@ import java.io.IOException;
 import java.io.DataInputStream;
 import java.util.Iterator;
 import org.apache.mahout.math.Varint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.google.protobuf.InvalidProtocolBufferException;
+
+import skadistats.spectre.err.*;
 import skadistats.spectre.AspectReader;
+import skadistats.spectre.persist.AspectDeserializer;
+import skadistats.spectre.persist.Helpers.MessageEnvelope;
 import $msgType.protoPkg$.$msgType.protoFullCls$;
 
-public class Reader extends AspectReader 
-    implements Iterator<$msgType.protoCls$>, Iterable<$msgType.protoCls$> {
+public class Reader extends AspectReader implements Iterator<$msgType.protoCls$> {
 
-    public Reader(InputStream inStream) { super(inStream); }
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
+    public Reader(AspectDeserializer deser) throws IOException { super(deser); }
+
+    public boolean hasNext() { return deser.hasNext(); }
 
     public $msgType.protoCls$ next() {
         try {
-            while (hasNext()) {
-                DataInputStream din = new DataInputStream(inStream);
-    
-                int msgType = Varint.readUnsignedVarInt(din);
-                // ID: $msgType.msgId$ = $msgType.aspectPath$
-                if (consumeIfInternal(msgType) == $msgType.msgId$) {
-                    return $msgType.protoCls$.parseFrom(getMsgBytes());
-                } 
+            MessageEnvelope msgEnv = deser.readMsg();
+            if (msgEnv.msgType != $msgType.msgId$)
+                throw new MalformedAspect("MsgType:"+msgEnv.msgType+", Expected:$msgType.msgId$");
+
+            tick = msgEnv.tick;
+            try {
+                return $msgType.protoCls$.parseFrom(msgEnv.msgData);
+            } catch (InvalidProtocolBufferException pbe) {
+                throw new MalformedAspect(pbe.toString());
             }
-        } catch(IOException ex) {
-            System.err.println(ex);
+        } catch (IOException ioe) {
+            System.err.println(ioe.toString());
+            return null;
         }
-        return null;
     }
 
-    public Iterable<$msgType.protoCls$> iter$msgType.protoCls$() { return this; }
-
-    public Iterator<$msgType.protoCls$> iterator() { return this; }
+    public Iterable<$msgType.protoCls$> iter$msgType.protoCls$() { 
+        final Reader self = this;
+        return new Iterable<$msgType.protoCls$>() {
+            public Iterator<$msgType.protoCls$> iterator() { return self; }
+        };
+    }
 
 }
 >>

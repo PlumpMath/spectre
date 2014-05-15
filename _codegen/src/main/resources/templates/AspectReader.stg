@@ -5,96 +5,33 @@ package skadistats.spectre;
 import java.io.InputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.LinkedList;
 import org.apache.mahout.math.Varint;
-import skadistats.spectre.proto.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import skadistats.spectre.err.*;
+import skadistats.spectre.persist.AspectDeserializer;
 
 
 public abstract class AspectReader {
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
     protected int replayId;
     protected int tick;
     protected List<String> strTable;
-    protected InputStream inStream;
-    protected DataInputStream dinStream;
+    protected AspectDeserializer deser;
 
-    public final static int MAX_MSG_SIZE = 4096;
-
-    public AspectReader(InputStream inStream) {
-        this.inStream = inStream;
-        this.dinStream = new DataInputStream(inStream);
-        this.strTable = new LinkedList<String>();
-
-        // read replayId from stream
-        try {
-            int msgType = Varint.readUnsignedVarInt(dinStream);
-            if (consumeIfInternal(msgType) != 1) {
-                throw new MalformedAspect("Util.Info not first message in aspect");
-            }
-        } catch (IOException ioe) {
-            throw new MalformedAspect(ioe.toString());
-        }
+    public AspectReader(AspectDeserializer deser) throws IOException {
+        this.deser = deser;
+        this.strTable = deser.getStringTable();
+        this.replayId = deser.getReplayId();
     }
 
-    public boolean hasNext() {
-        try {
-            inStream.mark(32);
-            int msgType = Varint.readUnsignedVarInt(dinStream);
-            inStream.reset();
-            
-            return true;
-        } catch(IOException ex) {
-            return false;
-        }
-    }
-
-    public int consumeIfInternal(int msgType) throws IOException {
-        switch(msgType) {
-            case 0: // Util.Segment
-                Util.Segment seg = Util.Segment.parseFrom(getMsgBytes());
-                this.tick = seg.getTick();
-                break;
-            case 1: // Util.Info
-                Util.Info info = Util.Info.parseFrom(getMsgBytes());
-                this.replayId = info.getReplayId();
-                break;
-            case 2: // Util.StringTable
-                Util.StringTable st = Util.StringTable.parseFrom(getMsgBytes());
-                this.strTable = st.getValueList();
-                break;
-        }
-        return msgType;
-    }
-
-    protected byte[] getMsgBytes() throws IOException {
-        int msgSize = 0;
-
-        msgSize = Varint.readUnsignedVarInt(dinStream);
-        if (msgSize <= MAX_MSG_SIZE) {
-            byte[] byteBuf = new byte[msgSize];
-            int readCount = 0;
-            int n = 0;
-
-            while (readCount < msgSize) {
-                n = inStream.read(byteBuf, readCount, msgSize-readCount);
-                if (n == -1) {
-                    throw new MalformedAspect("Unexpected EOF. msgSize="+msgSize+", readCount="+readCount);
-                }
-                readCount += n;
-            }
-
-            return byteBuf;
-        }
-        else {
-            throw new RuntimeException("MAX_MSG_SIZE exceeded, msgSize="+msgSize);
-        }
-
-    }
-
-    public static AspectReader newReader(InputStream inStream, String aspectPath) 
-        throws AspectNotFound {
+    public static AspectReader newReader(AspectDeserializer deser, String aspectPath) 
+        throws AspectNotFound, IOException {
     
         $msgTypes:instantiate_msg_type()$
 
@@ -103,12 +40,14 @@ public abstract class AspectReader {
 
     $msgTypes:define_iters()$
 
+    public int getReplayId() { return replayId; }
+    public int getTick() { return tick; }
 }
 >>
 
 instantiate_msg_type(msgType) ::= <<
 if (aspectPath.equals("$msgType.aspectPath$")) {
-    return new $msgType.readWritePkg$.Reader(inStream);
+    return new $msgType.readWritePkg$.Reader(deser);
 }
 >>
 
