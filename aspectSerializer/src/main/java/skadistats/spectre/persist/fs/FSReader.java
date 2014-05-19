@@ -3,7 +3,7 @@ package skadistats.spectre.persist.fs;
 import java.io.*;
 import java.util.List;
 import org.apache.mahout.math.Varint;
-import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,8 +32,8 @@ public class FSReader implements AspectDeserializer {
         // open file
         filePath = aspectBase+"/"+aspectPath+"/"+replayId;
         try {
-            fileIn = new BZip2CompressorInputStream(new BufferedInputStream(
-                                                    new FileInputStream(filePath)));
+            fileIn = new GzipCompressorInputStream(new BufferedInputStream(
+                                                   new FileInputStream(filePath)));
             dataIn = new DataInputStream(fileIn);
         } catch(IOException ex) {
             throw new AspectNotFound(ex.toString());
