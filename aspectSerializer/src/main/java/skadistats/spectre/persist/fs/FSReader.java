@@ -3,6 +3,7 @@ package skadistats.spectre.persist.fs;
 import java.io.*;
 import java.util.List;
 import org.apache.mahout.math.Varint;
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,9 +32,10 @@ public class FSReader implements AspectDeserializer {
         // open file
         filePath = aspectBase+"/"+aspectPath+"/"+replayId;
         try {
-            fileIn = new BufferedInputStream(new FileInputStream(filePath));
+            fileIn = new BZip2CompressorInputStream(new BufferedInputStream(
+                                                    new FileInputStream(filePath)));
             dataIn = new DataInputStream(fileIn);
-        } catch(FileNotFoundException ex) {
+        } catch(IOException ex) {
             throw new AspectNotFound(ex.toString());
         }
         
@@ -53,7 +55,7 @@ public class FSReader implements AspectDeserializer {
         raf.seek(raf.length()-4); // strtable offset data
         int strOff = raf.readInt();
         if (strOff > raf.length())
-            throw new MalformedAspect("StringTable corrupted: strOff too big:{}", strOff); 
+            throw new MalformedAspect("StringTable corrupted: strOff too big:"+strOff); 
         raf.seek(raf.length()-strOff); // seek to beginning of strtable entry
         int strSize = strOff-4;
 

@@ -3,6 +3,7 @@ package skadistats.spectre.persist.fs;
 import java.io.*;
 import java.util.List;
 import org.apache.mahout.math.Varint;
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,8 @@ public class FSWriter implements AspectSerializer {
             if (!filePath.getParentFile().exists()) 
                 filePath.getParentFile().mkdirs();
 
-            dataOut = new DataOutputStream(new FileOutputStream(filePath));
+            dataOut = new DataOutputStream(new BZip2CompressorOutputStream(
+                                           new FileOutputStream(filePath)));
         } catch (FileNotFoundException ex) {
             throw new AspectNotFound(ex.toString());
         }
