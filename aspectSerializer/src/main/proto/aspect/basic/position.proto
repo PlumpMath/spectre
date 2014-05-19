@@ -2,8 +2,8 @@ package position;
 
 option java_package = "skadistats.spectre.proto.basic";
 
-message HeroPosition {
-    optional int32  hero_idx = 1;
-    optional sint32 pos_x    = 2;
-    optional sint32 pos_y    = 3;
+message EntityPosition {
+    optional int32  entity_idx = 1;
+    optional sint32 pos_x      = 2;
+    optional sint32 pos_y      = 3;
 }
