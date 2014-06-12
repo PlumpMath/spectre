@@ -23,6 +23,8 @@ public class Reader extends AspectReader implements Iterator<$msgType.protoCls$>
 
     public Reader(AspectDeserializer deser) throws IOException { super(deser); }
 
+    public void remove() { throw new UnsupportedOperationException(); }
+
     public boolean hasNext() { return deser.hasNext(); }
 
     public $msgType.protoCls$ next() {

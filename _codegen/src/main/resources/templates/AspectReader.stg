@@ -40,6 +40,7 @@ public abstract class AspectReader {
 
     $msgTypes:define_iters()$
 
+    public String lookupString(int index) { return strTable.get(index); }
     public int getReplayId() { return replayId; }
     public int getTick() { return tick; }
 }
