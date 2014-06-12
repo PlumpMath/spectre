@@ -26,7 +26,7 @@ public abstract class AspectReader {
 
     public AspectReader(AspectDeserializer deser) throws IOException {
         this.deser = deser;
-        this.strTable = deser.getStringTable();
+        this.strTable = deser.readStringTable();
         this.replayId = deser.getReplayId();
     }
 

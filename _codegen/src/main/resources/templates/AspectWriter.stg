@@ -51,7 +51,7 @@ public class AspectWriter {
 
     $msgTypes:define_writers()$
 
-    public void close() throws IOException { ser.close(strTable); }
+    public void close() throws IOException { ser.writeStringTable(strTable); }
 }
 >>
 
