@@ -15,7 +15,7 @@ import skadistats.spectre.proto.basic.Position.EntityPosition;
 
 public class WritePosition {
     public static void main(String[] args) throws IOException, AspectNotFound {
-        Spectre spectre = new Spectre("/tmp");
+        Spectre spectre = new Spectre("skadistats-artifacts");
 
         AspectWriter writer = spectre.newWriter("/basic/position/hero", 1111);
         EntityPosition aPos = null;
@@ -30,11 +30,12 @@ public class WritePosition {
         writer.write(aPos);
         writer.close();
 
+
         AspectReader reader = spectre.newReader("/basic/position/hero", 1111);
 
         System.out.println("Replay: "+reader.getReplayId());
         for (EntityPosition pos : reader.iterEntityPosition()) {
-            System.out.println(reader.getTick()+" : ["+pos.getEntityIdx()+"] "+pos.getPosX()+"/"+pos.getPosY());
+            System.out.println(reader.getTick()+" : ["+pos.getPosX()+"/"+pos.getPosY()+"] "+reader.lookupString(pos.getEntityIdx()));
         }
         System.out.println("Done");
     }
