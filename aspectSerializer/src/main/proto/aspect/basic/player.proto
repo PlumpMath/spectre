@@ -1,0 +1,16 @@
+package player;
+
+option java_package = "skadistats.spectre.proto.basic";
+
+enum TEAM {
+     RADIANT = 0;
+     DIRE = 1;
+     SPECTATOR = 2;
+     OTHER = 4;
+}
+
+message PlayerIdentity {
+    optional int64  player_id = 3;
+    optional int32  hero_idx  = 1;
+    optional TEAM   team      = 2;
+}

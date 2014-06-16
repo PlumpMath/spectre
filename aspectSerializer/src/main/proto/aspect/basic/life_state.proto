@@ -1,0 +1,10 @@
+package life_state;
+
+option java_package = "skadistats.spectre.proto.basic";
+
+message EntityLifeState {
+    optional int32 entity_idx = 1;
+    optional bool  alive      = 2;
+    optional int32 current_hp = 3;
+    optional int32 max_hp     = 4;
+}

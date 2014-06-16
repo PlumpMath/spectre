@@ -1,0 +1,18 @@
+package time;
+
+option java_package = "skadistats.spectre.proto.basic";
+
+message GameTime {
+    optional double game_time = 1;
+    optional bool   paused    = 2;
+}
+
+message StateChangeTime {
+    optional double loading_time    = 1;
+    optional double draft_time      = 2;
+    optional double strategy_time   = 3;
+    optional double pregame_time    = 4;
+    optional double game_time       = 5;
+    optional double postgame_time   = 6;
+    optional double disconnect_time = 7;
+}
