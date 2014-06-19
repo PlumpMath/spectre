@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.DataInputStream;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Collection;
 import org.apache.mahout.math.Varint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,40 +19,83 @@ import skadistats.spectre.persist.AspectDeserializer;
 import skadistats.spectre.persist.Helpers.MessageEnvelope;
 import $msgType.protoPkg$.$msgType.protoFullCls$;
 
-public class Reader extends AspectReader implements Iterator<$msgType.protoCls$> {
+public class Reader extends AspectReader {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     public Reader(AspectDeserializer deser) throws IOException { super(deser); }
 
-    public void remove() { throw new UnsupportedOperationException(); }
+    private class MessageIterator implements Iterator<$msgType.protoCls$> {
+        public AspectReader reader;
 
-    public boolean hasNext() { return deser.hasNext(); }
+        public MessageIterator(AspectReader reader) { this.reader = reader; }
 
-    public $msgType.protoCls$ next() {
-        try {
-            MessageEnvelope msgEnv = deser.readMsg();
-            if (msgEnv.msgType != $msgType.msgId$)
-                throw new MalformedAspect("MsgType:"+msgEnv.msgType+", Expected:$msgType.msgId$");
+        public boolean hasNext() { return reader._getDeserializer().hasNext(); }
 
-            tick = msgEnv.tick;
+        public $msgType.protoCls$ next() {
             try {
-                return $msgType.protoCls$.parseFrom(msgEnv.msgData);
-            } catch (InvalidProtocolBufferException pbe) {
-                throw new MalformedAspect(pbe.toString());
+                MessageEnvelope msgEnv = reader._getDeserializer().readMsg();
+                if (msgEnv.msgType != $msgType.msgId$)
+                    throw new MalformedAspect("MsgType:"+msgEnv.msgType+", Expected:$msgType.msgId$");
+
+                tick = msgEnv.tick;
+                try {
+                    return $msgType.protoCls$.parseFrom(msgEnv.msgData);
+                } catch (InvalidProtocolBufferException pbe) {
+                    throw new MalformedAspect(pbe.toString());
+                }
+            } catch (IOException ioe) {
+                System.err.println(ioe.toString());
+                return null;
             }
-        } catch (IOException ioe) {
-            System.err.println(ioe.toString());
-            return null;
         }
+
+        public void remove() { throw new UnsupportedOperationException(); }
+    }
+
+    private class TickIterator implements Iterator< Collection<$msgType.protoCls$> > {
+        private MessageIterator iter;
+        private int currentTick;
+        private $msgType.protoCls$ nextItem;
+
+        public TickIterator(MessageIterator iter) { this.iter = iter; }
+
+        public boolean hasNext() { return iter.hasNext(); }
+
+        public Collection<$msgType.protoCls$> next() {
+            Collection msgBag = new LinkedList<$msgType.protoCls$>();
+            while (iter.hasNext()) {
+                if (nextItem == null)
+                    nextItem = iter.next();
+
+                if (iter.reader.getTick() != currentTick) {
+                    break;
+                } else {
+                    msgBag.add( nextItem );
+                    nextItem = null;
+                }
+            }
+            currentTick = iter.reader.getTick();
+            return msgBag;
+        }
+
+        public void remove() { throw new UnsupportedOperationException(); }
     }
 
     public Iterable<$msgType.protoCls$> iter$msgType.protoCls$() { 
-        final Reader self = this;
+        final AspectReader reader = this;
         return new Iterable<$msgType.protoCls$>() {
-            public Iterator<$msgType.protoCls$> iterator() { return self; }
+            public Iterator<$msgType.protoCls$> iterator() { return new MessageIterator(reader); }
         };
     }
 
+    public Iterable< Collection<$msgType.protoCls$> > iter$msgType.protoCls$ByTick() {
+        final AspectReader reader = this;
+        return new Iterable< Collection<$msgType.protoCls$> >() {
+            public Iterator< Collection<$msgType.protoCls$> > iterator() {
+                return new TickIterator(new MessageIterator(reader));
+            }
+        };
+    }
 }
 >>

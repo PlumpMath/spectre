@@ -1,6 +1,7 @@
 package skadistats;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +38,15 @@ public class WritePosition {
         for (EntityPosition pos : reader.iterEntityPosition()) {
             System.out.println(reader.getTick()+" : ["+pos.getPosX()+"/"+pos.getPosY()+"] "+reader.lookupString(pos.getEntityIdx()));
         }
+
+        for (Collection<EntityPosition> posBag : reader.iterEntityPositionByTick()) {
+            System.out.println(reader.getTick()+" : "+posBag.size()+" messages");
+
+            for (EntityPosition pos : posBag) {
+                System.out.println("\t : ["+pos.getPosX()+"/"+pos.getPosY()+"] "+reader.lookupString(pos.getEntityIdx()));
+            }
+        }
+
         System.out.println("Done");
     }
 }

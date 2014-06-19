@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Collection;
 import org.apache.mahout.math.Varint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,8 @@ public abstract class AspectReader {
 
     $msgTypes:define_iters()$
 
+    public AspectDeserializer _getDeserializer() { return deser; }
+
     public String lookupString(int index) { return strTable.get(index); }
     public int getReplayId() { return replayId; }
     public int getTick() { return tick; }
@@ -54,6 +57,9 @@ if (aspectPath.equals("$msgType.aspectPath$")) {
 
 define_iters(msgType) ::= <<
 public Iterable<$msgType.protoPkg$.$msgType.protoFullCls$> iter$msgType.protoCls$() {
+    throw new RuntimeException("Incorrect Reader instantiated");
+}
+public Iterable< Collection<$msgType.protoPkg$.$msgType.protoFullCls$> > iter$msgType.protoCls$ByTick() {
     throw new RuntimeException("Incorrect Reader instantiated");
 }
 >>
