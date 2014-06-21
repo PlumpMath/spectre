@@ -60,6 +60,23 @@ public class S3Reader extends skadistats.spectre.persist.stream.StreamReader {
     }
 
     public List<String> readStringTable() throws IOException {
+        /* Pay particularly close attention the order in which the
+           buffering and creation of the new gzip stream occures.
+
+           Proper order:
+           1. Allocate byte[] = offset value - 4 
+              (4 bytes for the offset value at the end of the file)
+
+           2. Fill this buffer from the raw (un-gzip'd) stream
+
+           3. Then wrap the byte[] in a gzip reader
+
+           Note:
+              If you create a new gzip'd stream and then try to
+              fill the buffer it won't work because the number of
+              gzip'd bytes != number of raw bytes in stream.
+        */
+
         ////////////////////////////////////////////
         // get aspect size
         log.trace("getObjectMetadata:{}/{}", s3Bucket, s3Key);
@@ -80,7 +97,7 @@ public class S3Reader extends skadistats.spectre.persist.stream.StreamReader {
 
         ////////////////////////////////////////////
         // download gzip'd string table into memory
-        int stSz = new Long(aspectSz-offsetVal-4).intValue();
+        int stSz = new Long(offsetVal-4).intValue();
         long start = aspectSz-offsetVal;
         long end   = start+stSz-1;
         S3Object stObj = s3Client.getObject(new GetObjectRequest(s3Bucket,s3Key)
