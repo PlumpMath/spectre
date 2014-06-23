@@ -1,8 +1,12 @@
 <project name="spectre" default="dist" basedir=".">
     <property name="spectre-dir" location="./aspectSerializer"/>
     <property name="spectre-jar" location="${spectre-dir}/target/spectre-1.0-jar-with-dependencies.jar"/>
+    <property name="proto-path" location="${spectre-dir}/src/main/proto"/>
+
     <property name="cgen-dir" location="./_codegen"/>
     <property name="cgen-jar" location="${cgen-dir}/target/aspect-code-generator-1.0-jar-with-dependencies.jar"/>
+    <property name="python-dir" location="./python"/>
+    <property name="pyproto-dir" location="${python-dir}/spectre/proto"/>
 
     <target name="init">
         <tstamp/>
@@ -36,9 +40,15 @@
     <!-- ======================================== -->
     <!-- aspectSerializer                         -->
     <!-- ======================================== -->
-    <target name="spectre-build" depends="init,code-gen">
+    <target name="spectre-build" depends="init,generate-code">
         <exec executable="mvn" dir="${spectre-dir}">
             <arg value="compile"/>
+        </exec>
+    </target>
+
+    <target name="spectre-dist" depends="spectre-build">
+        <exec executable="mvn" dir="${spectre-dir}">
+            <arg value="package"/>
         </exec>
     </target>
 
@@ -49,33 +59,39 @@
     </target>
 
     <!-- ======================================== -->
+    <!-- python                                   -->
+    <!-- ======================================== -->
+    <target name="python-protoc" depends="init">
+        <mkdir dir="${pyproto-dir}"/>
+        <property name="protoc" value="protoc --python_out=${pyproto-dir} --proto_path=${proto-path}"/>
+        <exec executable="bash" dir="${python-dir}">
+            <arg value="-c"/>
+            <arg value="find ${proto-path} -name '*.proto' | xargs ${protoc}"/>
+        </exec>
+    </target>
+
+    <target name="python-clean">
+        <delete includeEmptyDirs="true">
+            <fileset dir="${pyproto-dir}" includes="**/*"/>
+        </delete>
+    </target>
+
+    <!-- ======================================== -->
     <!-- global                                   -->
     <!-- ======================================== -->
-    <target name="dist" depends="compile">
+    <target name="build" depends="spectre-build">
+    </target>
+
+    <target name="package" depends="build">
         <exec executable="mvn" dir="${spectre-dir}">
             <arg value="package"/>
         </exec>
     </target>
 
-    <target name="clean">
-        <exec executable="mvn" dir="${cgen-dir}">
-            <arg value="clean"/>
-        </exec>
-        <exec executable="mvn" dir="${spectre-dir}">
-            <arg value="clean"/>
-        </exec>
+    <target name="clean" depends="cgen-clean,spectre-clean">
     </target>
 
-    <target name="test">
-        <exec executable="mvn" dir="${cgen-dir}">
-            <arg value="test"/>
-        </exec>
-        <exec executable="mvn" dir="${spectre-dir}">
-            <arg value="test"/>
-        </exec>
-    </target>
-
-    <target name="write-test" depends="dist">
+    <target name="write-test" depends="spectre-dist">
         <java classname="skadistats.WritePosition" classpath="${spectre-jar}" failonerror="true"/>
     </target>
 </project>
