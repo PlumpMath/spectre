@@ -8,6 +8,9 @@
         <tstamp/>
     </target>
 
+    <!-- ======================================== -->
+    <!-- _codegen                                 -->
+    <!-- ======================================== -->
     <target name="is-code-gen-built">
         <condition property="codeGenJarExists">
             <available file="${cgen-jar}"/>
@@ -20,16 +23,34 @@
         </exec>
     </target>
 
-    <target name="code-gen" depends="code-gen-compile">
+    <target name="generate-code" depends="code-gen-compile">
         <java jar="${cgen-jar}" fork="true" failonerror="true"/>
     </target>
 
-    <target name="compile" depends="init,code-gen">
+    <target name="cgen-clean">
+        <exec executable="mvn" dir="${cgen-dir}">
+            <arg value="clean"/>
+        </exec>
+    </target>
+
+    <!-- ======================================== -->
+    <!-- aspectSerializer                         -->
+    <!-- ======================================== -->
+    <target name="spectre-build" depends="init,code-gen">
         <exec executable="mvn" dir="${spectre-dir}">
             <arg value="compile"/>
         </exec>
     </target>
 
+    <target name="spectre-clean">
+        <exec executable="mvn" dir="${spectre-dir}">
+            <arg value="clean"/>
+        </exec>
+    </target>
+
+    <!-- ======================================== -->
+    <!-- global                                   -->
+    <!-- ======================================== -->
     <target name="dist" depends="compile">
         <exec executable="mvn" dir="${spectre-dir}">
             <arg value="package"/>
