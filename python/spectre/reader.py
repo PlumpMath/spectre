@@ -36,14 +36,14 @@ MAX_STABLE_SIZE = 32*1024*1024
 
 class AspectReader(object):
 
-    def __init__(self, aspect_path, replay_id):
+    def __init__(self, aspect_path, raw_reader):
         try:
             self.msg_cls = mapper.aspect_map[aspect_path]['cls']
             self.msg_id  = mapper.aspect_map[aspect_path]['id']
         except KeyError as e:
             raise err.UnknownAspectPath(aspect_path)
 
-        self.raw = S3RawReader(aspect_path, replay_id)
+        self.raw = raw_reader
 
         self.aspect_path = aspect_path
         self.string_table = self.raw.read_string_table()
@@ -66,7 +66,18 @@ class AspectReader(object):
             yield self._read_msg()
 
     def by_tick(self):
-        pass
+        current_tick = self.tick
+        msg_list = []
+
+        while self._has_next():
+            next_msg = self._read_msg()
+
+            if self.tick == current_tick:
+                msg_list.append(next_msg)
+            else:
+                yield msg_list
+                current_tick = self.tick
+                msg_list = []
 
     def _has_next(self):
         try:
@@ -102,8 +113,8 @@ class AspectReader(object):
 
 class S3RawReader(object):
 
-    def __init__(self, aspect_path, replay_id):
-        self.bkt = S3Connection().get_bucket('skadistats-artifacts')
+    def __init__(self, bucket_name, aspect_path, replay_id):
+        self.bkt = S3Connection().get_bucket(bucket_name)
         self.key = self.bkt.get_key('{}/{}'.format(aspect_path, replay_id))
         if self.key is None:
             raise err.AspectInstanceNotFound('{}/{}'.format(aspect_path,replay_id))

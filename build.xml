@@ -61,7 +61,7 @@
     <!-- ======================================== -->
     <!-- python                                   -->
     <!-- ======================================== -->
-    <target name="python-protoc" depends="init">
+    <target name="python-protoc" depends="build-spectre">
         <mkdir dir="${pyproto-dir}"/>
 
         <copy file="${proto-path}/msgtypes.properties" todir="${pyproto-dir}"/>
@@ -82,6 +82,9 @@
             <arg value="${proto-path}"/>
             <arg value="${python-dir}/spectre"/>
         </exec>
+    </target>
+
+    <target name="build-python" depends="python-protoc">
     </target>
 
     <target name="clean-python">
