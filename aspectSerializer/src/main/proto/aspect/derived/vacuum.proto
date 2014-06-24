@@ -1,0 +1,10 @@
+package vacuum;
+
+import "aspect/basic/player.proto"; // Get the TEAM enum
+
+option java_package = "skadistats.spectre.proto.derived";
+
+message GroupUpTime {
+    optional player.TEAM team  = 1;
+    optional double      time = 2;
+}
