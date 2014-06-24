@@ -1,0 +1,34 @@
+name:                spectre
+version:             0.1.0.0
+license:             AllRightsReserved
+license-file:        LICENSE
+author:              Laurie Clark-Michalek
+maintainer:          lclarkmichalek@gmail.com
+build-type:          Custom
+cabal-version:       >=1.10
+
+library 
+  hs-source-dirs:      src
+  exposed-modules:     Skadistats.Spectre.S3,
+                       Skadistats.Spectre.AspectReader,
+                       Skadistats.Spectre.Util
+  build-depends:       base >=4.6 && <4.7,
+                       data-accessor ==0.2.2.5,
+                       hprotoc,
+                       protocol-buffers,
+                       protocol-buffers-descriptor,
+                       resourcet,
+                       conduit,
+                       http-conduit,
+                       text,
+                       aws,
+                       bytestring,
+                       hsini ==0.3.1,
+                       strict,
+                       filepath,
+                       zlib,
+                       binary,
+                       containers,
+                       utf8-string,
+                       mtl
+  default-language:    Haskell2010
