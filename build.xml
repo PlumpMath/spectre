@@ -1,15 +1,19 @@
 <project name="spectre" default="dist" basedir=".">
     <property name="spectre-dir" location="./aspectSerializer"/>
-    <property name="spectre-jar" location="${spectre-dir}/target/spectre-1.0-jar-with-dependencies.jar"/>
     <property name="proto-path" location="${spectre-dir}/src/main/proto"/>
 
     <property name="cgen-dir" location="./_codegen"/>
     <property name="cgen-jar" location="${cgen-dir}/target/aspect-code-generator-1.0-jar-with-dependencies.jar"/>
     <property name="python-dir" location="./python"/>
     <property name="pyproto-dir" location="${python-dir}/spectre/proto"/>
+    <property name="python-pkg" location="./dist/py-spectre.tar.gz"/>
 
     <target name="init">
         <tstamp/>
+    </target>
+
+    <target name="make-dist">
+        <mkdir dir="./dist"/>
     </target>
 
     <!-- ======================================== -->
@@ -46,10 +50,16 @@
         </exec>
     </target>
 
-    <target name="pkg-spectre" depends="build-spectre">
+    <target name="pkg-spectre" depends="make-dist,build-spectre">
         <exec executable="mvn" dir="${spectre-dir}">
             <arg value="package"/>
         </exec>
+
+        <copy todir="./dist">
+            <fileset dir="${spectre-dir}/target">
+                <include name="spectre-*-jar-with-dependencies.jar"/>
+            </fileset>
+        </copy>
     </target>
 
     <target name="clean-spectre">
@@ -85,11 +95,24 @@
     </target>
 
     <target name="build-python" depends="python-protoc">
+        <exec executable="bash" dir="${python-dir}">
+            <arg value="-c"/>
+            <arg value="find . -name '*.py' | xargs -I '{}' python -m py_compile {}"/>
+        </exec>
+    </target>
+
+    <target name="pkg-python" depends="make-dist,build-python">
+        <tar destfile="${python-pkg}" basedir="${python-dir}" 
+            includes="**/*.pyc" excludes="import_msgtypes.pyc"
+            compression="gzip"/>
     </target>
 
     <target name="clean-python">
         <delete dir="${pyproto-dir}"/>
         <delete file="${python-dir}/spectre/mapper.py"/>
+        <delete>
+            <fileset dir="${python-dir}" includes="**/*.pyc"/>
+        </delete>
     </target>
 
     <!-- ======================================== -->
@@ -98,13 +121,11 @@
     <target name="build" depends="build-spectre">
     </target>
 
-    <target name="package" depends="pkg-spectre">
+    <target name="package" depends="pkg-spectre,pkg-python">
     </target>
 
     <target name="clean" depends="clean-cgen,clean-spectre,clean-python">
+        <delete dir="./dist"/>
     </target>
 
-    <target name="write-test" depends="pkg-spectre">
-        <java classname="skadistats.WritePosition" classpath="${spectre-jar}" failonerror="true"/>
-    </target>
 </project>
