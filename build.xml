@@ -31,7 +31,7 @@
         <java jar="${cgen-jar}" fork="true" failonerror="true"/>
     </target>
 
-    <target name="cgen-clean">
+    <target name="clean-cgen">
         <exec executable="mvn" dir="${cgen-dir}">
             <arg value="clean"/>
         </exec>
@@ -40,19 +40,19 @@
     <!-- ======================================== -->
     <!-- aspectSerializer                         -->
     <!-- ======================================== -->
-    <target name="spectre-build" depends="init,generate-code">
+    <target name="build-spectre" depends="init,generate-code">
         <exec executable="mvn" dir="${spectre-dir}">
             <arg value="compile"/>
         </exec>
     </target>
 
-    <target name="spectre-dist" depends="spectre-build">
+    <target name="pkg-spectre" depends="build-spectre">
         <exec executable="mvn" dir="${spectre-dir}">
             <arg value="package"/>
         </exec>
     </target>
 
-    <target name="spectre-clean">
+    <target name="clean-spectre">
         <exec executable="mvn" dir="${spectre-dir}">
             <arg value="clean"/>
         </exec>
@@ -63,35 +63,45 @@
     <!-- ======================================== -->
     <target name="python-protoc" depends="init">
         <mkdir dir="${pyproto-dir}"/>
+
+        <copy file="${proto-path}/msgtypes.properties" todir="${pyproto-dir}"/>
+
         <property name="protoc" value="protoc --python_out=${pyproto-dir} --proto_path=${proto-path}"/>
         <exec executable="bash" dir="${python-dir}">
             <arg value="-c"/>
             <arg value="find ${proto-path} -name '*.proto' | xargs ${protoc}"/>
         </exec>
+
+        <exec executable="bash" dir="${pyproto-dir}">
+            <arg value="-c"/>
+            <arg value="find . -type d | xargs -I '{}' touch {}/__init__.py"/>
+        </exec>
+
+        <exec executable="python">
+            <arg value="${python-dir}/import_msgtypes.py"/>
+            <arg value="${proto-path}"/>
+            <arg value="${python-dir}/spectre"/>
+        </exec>
     </target>
 
-    <target name="python-clean">
-        <delete includeEmptyDirs="true">
-            <fileset dir="${pyproto-dir}" includes="**/*"/>
-        </delete>
+    <target name="clean-python">
+        <delete dir="${pyproto-dir}"/>
+        <delete file="${python-dir}/spectre/mapper.py"/>
     </target>
 
     <!-- ======================================== -->
     <!-- global                                   -->
     <!-- ======================================== -->
-    <target name="build" depends="spectre-build">
+    <target name="build" depends="build-spectre">
     </target>
 
-    <target name="package" depends="build">
-        <exec executable="mvn" dir="${spectre-dir}">
-            <arg value="package"/>
-        </exec>
+    <target name="package" depends="pkg-spectre">
     </target>
 
-    <target name="clean" depends="cgen-clean,spectre-clean">
+    <target name="clean" depends="clean-cgen,clean-spectre,clean-python">
     </target>
 
-    <target name="write-test" depends="spectre-dist">
+    <target name="write-test" depends="pkg-spectre">
         <java classname="skadistats.WritePosition" classpath="${spectre-jar}" failonerror="true"/>
     </target>
 </project>
