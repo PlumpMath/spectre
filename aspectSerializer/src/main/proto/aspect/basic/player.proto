@@ -10,7 +10,8 @@ enum TEAM {
 }
 
 message PlayerIdentity {
-    optional int64  player_id = 3;
-    optional int32  hero_idx  = 1;
-    optional TEAM   team      = 2;
+    optional int64  player_id   = 3;
+    optional int32  hero_idx    = 1;
+    optional TEAM   team        = 2;
+    optional string player_name = 4;
 }

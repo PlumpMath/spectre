@@ -1,0 +1,20 @@
+package match;
+
+import "aspect/basic/player.proto"; // Get the TEAM enum
+
+option java_package = "skadistats.spectre.proto.basic";
+
+message Draft {
+    optional int64 match_id = 1;
+
+    message DraftEntry {
+        optional int32                 order    = 1;
+        optional int32                 hero_idx = 2;
+        optional player.TEAM           side     = 3;
+        optional bool                  is_pick  = 4;
+        optional int32                 duration = 5; // Duration in seconds for this pick/ban
+        optional player.PlayerIdentity player   = 6;
+    }
+
+    repeated DraftEntry entries = 2;
+}
