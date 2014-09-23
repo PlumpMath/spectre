@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Spectre::VERSION
   spec.authors       = ["Mikolai Fajer"]
   spec.email         = ["mfajer@gmail.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
+  spec.summary       = "Spectre reader for Skadistats aspects."
+  spec.description   = ""
   spec.homepage      = ""
   spec.license       = "MIT"
 
