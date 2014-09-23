@@ -20,9 +20,14 @@ module Spectre
 			@msg_id = AspectMapper::MAPPER[aspect_path]['id']
 			@raw = raw_reader
 			@aspect_path = aspect_path
+			@string_table = @raw.read_string_table
 			@tick = 0
 			@istream = @raw.get_stream
 			@replay_id = read_varint(@istream)
+		end
+
+		def lookup_string(st_idx)
+			@string_table[st_idx]
 		end
 
 		def each_msg(&block)
@@ -86,7 +91,7 @@ module Spectre
 			unless msg_size < MAX_MSG_SIZE
 				raise RuntimeError, "_read_msg found a message of size #{msg_size} (max should be #{MAX_MSG_SIZE})"
 			end
-			msg = @msg_cls.new()
+			msg = @msg_cls.new
 			msg.parse_from_string(@istream.read(msg_size))
 			msg
 		end
@@ -108,6 +113,26 @@ module Spectre
 		end
 
 		def read_string_table
+			# Download the last 4 bytes (string table offset)
+			offset_str = @key.read({ :range => "bytes=#{@key.content_length-4}-#{@key.content_length-1}" })
+			offset_val = offset_str.unpack("L>")[0]
+			unless (0 < offset_val) && (offset_val < @key.content_length)
+				raise RuntimeError, "StringTable corrupted: offset invalid: #{offset_val}"
+			end
+
+			# Download the gzip'd string table
+			st_sz = offset_val - 4
+			start = @key.content_length - offset_val
+			finish = start + st_sz - 1
+			unless st_sz <= MAX_MSG_SIZE
+				raise RuntimeError, "StringTable size: #{st_sz} > #{MAX_MSG_SIZE}"
+			end
+
+			# Read the protobuf data
+			str_table_str = @key.read({ :range => "bytes=#{start}-#{finish}" })
+			str_table = Internal::StringTable.new
+			str_table.parse_from_string(Zlib::GzipReader.new(StringIO.new(str_table_str)).read)
+			str_table
 		end
 	end
 end
