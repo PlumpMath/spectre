@@ -1,4 +1,4 @@
-package time;
+package times;
 
 option java_package = "skadistats.spectre.proto.basic";
 
