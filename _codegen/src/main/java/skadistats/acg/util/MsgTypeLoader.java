@@ -17,7 +17,7 @@ import java.util.Properties;
 import skadistats.acg.util.FileFinder;
 
 public class MsgTypeLoader {
-    final static String PROP_BASE = ".";
+    final static String PROP_BASE = "aspectSerializer";
     final static String PROP_NAME = "msgtypes.properties";
 
     static public class InvalidMessageDeclaration extends RuntimeException {
