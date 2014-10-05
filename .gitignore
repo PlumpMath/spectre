@@ -2,5 +2,6 @@
 *.class
 *.pyc
 target/
+dist/
 python/spectre/proto/
 python/spectre/mapper.py
