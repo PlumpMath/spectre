@@ -17,6 +17,7 @@
 
 import struct
 import logging
+import types
 from cStringIO import StringIO
 from gzip import GzipFile
 from boto.s3.connection import S3Connection
@@ -35,6 +36,46 @@ MAX_STABLE_SIZE = 32*1024*1024
 
 
 class AspectReader(object):
+
+    def __init__(self, api_key, aspect_paths, replay_query):
+        self._replays = None
+        self._api_key = api_key
+
+        if isinstance(aspect_paths, list):
+            self._aspect_paths = aspect_paths
+        elif isinstance(aspect_paths, str):
+            self._aspect_paths = list(aspect_paths)
+        else:
+            raise RuntimeException("Invalid type for argument aspect_paths: {}".format(type(aspect_paths)))
+
+        if isinstance(replay_query, list):
+            self._replay_query = {'mid': ','.join(replay_query)}
+        elif isinstance(replay_query, string):
+            self._replay_query = {'mid': replay_query}
+        elif isinstance(replay_query, int):
+            self._replay_query = {'mid': replay_query}
+        elif isinstance(replay_query, dict):
+            self._replay_query = replay_query
+        else:
+            raise RuntimeException("Invalid type for argument replay_query: {}".format(type(replay_query)))
+
+
+    @property
+    def replay(self):
+        return self.replays[0]
+
+    @property
+    def replays(self):
+        if self._replays is None:
+            self._replays = self._fetch_aspects()
+        return self._replays
+
+    
+    def _fetch_aspects(self):
+        urls = 
+
+
+class OldAspectReader(object):
 
     def __init__(self, aspect_path, raw_reader):
         try:
