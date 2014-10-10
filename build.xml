@@ -1,4 +1,4 @@
-<project name="spectre" default="dist" basedir=".">
+<project name="spectre" default="package" basedir=".">
     <property name="spectre-dir" location="./aspectSerializer"/>
     <property name="proto-path" location="${spectre-dir}/src/main/proto"/>
 

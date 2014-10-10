@@ -1,5 +1,10 @@
+import sys
+from os.path import join, abspath, realpath, dirname
 from spectre.reader import AspectReader, S3RawReader
 
+CD=abspath(dirname(__file__))
+sys.path.append(realpath(join(CD, 'proto')))
+print realpath(join(CD, 'proto'))
 
 class Spectre(object):
 
