@@ -9,3 +9,7 @@ class UnknownAspectPath(Exception):
 class AspectInstanceNotFound(Exception):
     def __init__(self, msg): 
         super(AspectInstanceNotFound, self).__init__(msg)
+
+class NetworkError(Exception):
+    def __init__(self, msg): 
+        super(NetworkError, self).__init__(msg)
