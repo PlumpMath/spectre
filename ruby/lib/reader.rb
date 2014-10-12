@@ -2,7 +2,7 @@ require 'zlib'
 require 'aws-sdk'
 
 require 'util'
-require 'proto/internal/fs.pb'
+require 'internal/fs.pb'
 require 'mapper'
 
 module Spectre
@@ -16,8 +16,8 @@ module Spectre
 			unless AspectMapper::MAPPER.include?(aspect_path)
 				raise KeyError, 'no aspect mapping for #{aspect_path}'
 			end
-			@msg_cls = AspectMapper::MAPPER[aspect_path]['cls']
-			@msg_id = AspectMapper::MAPPER[aspect_path]['id']
+			@msg_cls = AspectMapper::MAPPER[aspect_path][:cls]
+			@msg_id = AspectMapper::MAPPER[aspect_path][:id]
 			@raw = raw_reader
 			@aspect_path = aspect_path
 			@string_table = @raw.read_string_table
@@ -91,8 +91,7 @@ module Spectre
 			unless msg_size < MAX_MSG_SIZE
 				raise RuntimeError, "_read_msg found a message of size #{msg_size} (max should be #{MAX_MSG_SIZE})"
 			end
-			msg = @msg_cls.new
-			msg.parse_from_string(@istream.read(msg_size))
+			msg = @msg_cls.decode(@istream.read(msg_size))
 			msg
 		end
 	end
@@ -130,8 +129,7 @@ module Spectre
 
 			# Read the protobuf data
 			str_table_str = @key.read({ :range => "bytes=#{start}-#{finish}" })
-			str_table = Internal::StringTable.new
-			str_table.parse_from_string(Zlib::GzipReader.new(StringIO.new(str_table_str)).read)
+			str_table = Internal::StringTable.decode(Zlib::GzipReader.new(StringIO.new(str_table_str)).read)
 			str_table
 		end
 	end

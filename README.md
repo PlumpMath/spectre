@@ -61,6 +61,13 @@ This is the aspect path which is used to identify the given aspect when reading/
 Running `ant clean && ant` in the spectre root should be enough. The resulting jar is located
 at `/aspectSerializer/target/spectre-1.0-jar-with-dependencies.jar`.
 
+Ruby
+====
+
+The Ruby gem requires a modified version of the `beefcake` protobuf compiler.
+First grab [mfajer/beefcake](https://github.com/mfajer/beefcake) and install it with `rake install`.
+Then run `ant pkg-ruby` and install the resulting gem in the `dist` folder.
+
 To-Do
 =====
 
