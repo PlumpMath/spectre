@@ -5,3 +5,4 @@ target/
 dist/
 python/spectre/proto/
 python/spectre/mapper.py
+python/spectre/aspect_enum.py
