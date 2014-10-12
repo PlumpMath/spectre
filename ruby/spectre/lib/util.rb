@@ -8,7 +8,7 @@ def read_varint(io)
     shift = 0
 
     loop do
-        byte = io.getc.ord
+        byte = io.getbyte
 
         if (byte == nil)
             raise EOFError, "end-of-file encountered while decoding varint"

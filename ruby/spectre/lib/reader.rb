@@ -109,7 +109,7 @@ module Spectre
 		end
 
 		def get_stream
-			return Zlib::GzipReader.new(StringIO.new(@key.read), external_encoding: Encoding::ASCII_8BIT)
+			return Zlib::GzipReader.new(StringIO.new(@key.read), :external_encoding => Encoding::ASCII_8BIT)
 		end
 
 		def read_string_table
