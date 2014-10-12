@@ -8,6 +8,9 @@
     <property name="pyproto-dir" location="${python-dir}/spectre/proto"/>
     <property name="python-pkg" location="./dist/py-spectre.tar.gz"/>
 
+    <property name="ruby-dir" location="./ruby"/>
+    <property name="rubyproto-dir" location="${ruby-dir}/lib"/>
+
     <target name="init">
         <tstamp/>
     </target>
@@ -116,15 +119,51 @@
     </target>
 
     <!-- ======================================== -->
+    <!-- ruby                                     -->
+    <!-- ======================================== -->
+    <target name="ruby-protoc">
+        <property name="protoc" value="protoc --beefcake_out=${rubyproto-dir} --proto_path=${proto-path}"/>
+        <exec executable="bash" dir="${ruby-dir}">
+            <arg value="-c"/>
+            <arg value="find ${proto-path} -name '*.proto' | xargs ${protoc}"/>
+        </exec>
+
+        <exec executable="bash" dir="${ruby-dir}">
+            <arg value="-c"/>
+            <arg value="ruby ${ruby-dir}/import_msgtypes.rb -i ${proto-path}/msgtypes.properties -o ${rubyproto-dir}/mapper.rb"/>
+        </exec>
+    </target>
+
+    <target name="pkg-ruby" depends="ruby-protoc,make-dist">
+        <exec executable="bash" dir="${ruby-dir}">
+            <arg value="-c"/>
+            <arg value="gem build spectre.gemspec"/>
+        </exec>
+
+        <move todir="./dist">
+            <fileset dir="${ruby-dir}">
+                <include name="spectre-*.gem"/>
+            </fileset>
+        </move>
+    </target>
+
+    <target name="clean-ruby">
+        <delete file="${rubyproto-dir}/mapper.rb" />
+        <delete>
+            <fileset dir="${rubyproto-dir}" includes="**/*.pb.rb"/>
+        </delete>
+    </target>
+
+    <!-- ======================================== -->
     <!-- global                                   -->
     <!-- ======================================== -->
     <target name="build" depends="build-spectre">
     </target>
 
-    <target name="package" depends="pkg-spectre,pkg-python">
+    <target name="package" depends="pkg-spectre,pkg-python,pkg-ruby">
     </target>
 
-    <target name="clean" depends="clean-cgen,clean-spectre,clean-python">
+    <target name="clean" depends="clean-cgen,clean-spectre,clean-python,clean-ruby">
         <delete dir="./dist"/>
     </target>
 
