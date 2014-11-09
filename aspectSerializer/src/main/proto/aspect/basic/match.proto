@@ -18,3 +18,15 @@ message Draft {
 
     repeated DraftEntry entries = 2;
 }
+
+message KillDeathAssist {
+    message PlayerEntry {
+        optional int32                 hero_idx = 1;
+        optional player.PlayerIdentity player   = 2;
+        optional int32                 kills    = 3;
+        optional int32                 deaths   = 4;
+        optional int32                 assists  = 5;
+    }
+
+    repeated PlayerEntry entries = 2;
+}
