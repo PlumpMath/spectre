@@ -59,7 +59,7 @@ module Spectre
 						yield msg_list
 					end
 					current_tick = @tick
-					msg_list = Array.new
+					msg_list = [next_msg]
 				end
 			end
 		end
