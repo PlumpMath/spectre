@@ -26,8 +26,10 @@ module Spectre
 			@replay_id = read_varint(@istream)
 		end
 
+		attr_reader :tick
+
 		def lookup_string(st_idx)
-			@string_table[st_idx]
+			@string_table.value[st_idx]
 		end
 
 		def each_msg(&block)
